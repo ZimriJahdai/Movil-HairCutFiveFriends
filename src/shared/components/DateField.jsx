@@ -83,7 +83,7 @@ export function DateField({ label, error, leftIcon = 'event', value, onChange, p
       </Pressable>
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      {Platform.OS === 'ios' && showIOS ? (
+      {Platform.OS !== 'android' && showIOS ? (
         <DateTimePicker
           value={selectedDate}
           mode="datetime"
