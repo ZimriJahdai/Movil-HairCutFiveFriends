@@ -1,13 +1,38 @@
-// URLs base leídas de variables EXPO_PUBLIC_* (.env) con fallback a localhost.
-// En dispositivo físico SIEMPRE usar la IP LAN del backend (no localhost).
-// El emulador de Android usa 10.0.2.2 en lugar de localhost.
-
 const resolveUrl = (preferred, fallback) => {
   const value = preferred;
   return typeof value === 'string' && value.trim() ? value.trim() : fallback;
 };
 
+const stripPath = (url) => {
+  try {
+    const parsed = new URL(url);
+    parsed.pathname = '';
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return url;
+  }
+};
+
+const ensureBasePath = (url, basePath) => {
+  try {
+    const parsed = new URL(url);
+    if (parsed.pathname === '/' || !parsed.pathname || parsed.pathname === '') {
+      parsed.pathname = basePath;
+    } else if (!parsed.pathname.endsWith(basePath)) {
+      parsed.pathname = basePath;
+    }
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return url;
+  }
+};
+
 export const ENDPOINTS = {
-  AUTH: resolveUrl(process.env.EXPO_PUBLIC_AUTH_URL, 'http://localhost:3005'),
-  API: resolveUrl(process.env.EXPO_PUBLIC_API_URL, 'http://localhost:3006/HaircutFiveFriends/api/v1'),
+  AUTH: stripPath(
+    resolveUrl(process.env.EXPO_PUBLIC_AUTH_URL, 'http://localhost:3005')
+  ),
+  API: ensureBasePath(
+    resolveUrl(process.env.EXPO_PUBLIC_API_URL, 'http://localhost:3006'),
+    '/HaircutFiveFriends/api/v1'
+  ),
 };
