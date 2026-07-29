@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -15,6 +15,7 @@ export function DateField({ label, error, leftIcon = 'event', value, onChange, p
   const { colors } = useThemeStore();
   const styles = createStyles(colors);
   const [showIOS, setShowIOS] = useState(false);
+  const webInputRef = useRef(null);
 
   const selectedDate = value instanceof Date && !Number.isNaN(value.getTime()) ? value : new Date();
 
@@ -47,11 +48,27 @@ export function DateField({ label, error, leftIcon = 'event', value, onChange, p
     onChange(date);
   };
 
+  const handleWebChange = (e) => {
+    const val = e.target.value;
+    if (!val) return;
+    const parsed = new Date(val);
+    if (!Number.isNaN(parsed.getTime())) onChange(parsed);
+  };
+
+  const toWebValue = (d) => {
+    if (!(d instanceof Date) || Number.isNaN(d.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const open = () => {
     if (Platform.OS === 'android') {
       openAndroid();
-    } else {
+    } else if (Platform.OS === 'ios') {
       setShowIOS(true);
+    } else {
+      webInputRef.current?.showPicker?.();
+      webInputRef.current?.click?.();
     }
   };
 
@@ -73,6 +90,23 @@ export function DateField({ label, error, leftIcon = 'event', value, onChange, p
           display="spinner"
           minimumDate={minimumDate}
           onChange={handlePickIOS}
+        />
+      ) : null}
+
+      {Platform.OS === 'web' ? (
+        <input
+          ref={webInputRef}
+          type="datetime-local"
+          value={toWebValue(value)}
+          min={minimumDate ? toWebValue(minimumDate) : undefined}
+          onChange={handleWebChange}
+          style={{
+            position: 'absolute',
+            opacity: 0,
+            width: 0,
+            height: 0,
+            pointerEvents: 'none',
+          }}
         />
       ) : null}
     </View>
