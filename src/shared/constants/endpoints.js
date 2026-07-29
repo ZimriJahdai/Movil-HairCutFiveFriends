@@ -8,6 +8,6 @@ const resolveUrl = (preferred, fallback) => {
 };
 
 export const ENDPOINTS = {
-  AUTH: resolveUrl(process.env.EXPO_PUBLIC_AUTH_URL, 'http://localhost:3005/api/v1'),
+  AUTH: resolveUrl(process.env.EXPO_PUBLIC_AUTH_URL, 'http://localhost:3005'),
   API: resolveUrl(process.env.EXPO_PUBLIC_API_URL, 'http://localhost:3006/HaircutFiveFriends/api/v1'),
 };

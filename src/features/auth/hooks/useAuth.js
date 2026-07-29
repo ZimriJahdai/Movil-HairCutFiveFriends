@@ -25,7 +25,7 @@ export function useAuth() {
     async ({ email, password }) => {
       setLoading(true);
       try {
-        const { data } = await authClient.post('/auth/login', { email, password });
+        const { data } = await authClient.post('/api/v1/auth/login', { email, password });
         const token = data?.token;
         const user = data?.userDetails || data?.user || null;
         if (!token || !user) {
@@ -42,7 +42,7 @@ export function useAuth() {
 
         // Hidrata el perfil completo (email/phone/profilePicture) igual que la web.
         try {
-          const profileRes = await authClient.get('/auth/profile');
+          const profileRes = await authClient.get('/api/v1/auth/profile');
           const fullProfile = profileRes.data?.data || profileRes.data;
           if (fullProfile) setUser(fullProfile);
         } catch {
@@ -72,7 +72,7 @@ export function useAuth() {
         { name: form.name, email: form.email, password: form.password, phone: form.phone },
         form.profilePicture ? { uri: form.profilePicture, field: 'profilePicture' } : null
       );
-      const { data } = await authClient.post('/auth/register', formData);
+      const { data } = await authClient.post('/api/v1/auth/register', formData);
       return { ok: true, data };
     } catch (error) {
       return { ok: false, error: getApiError(error, 'No se pudo crear la cuenta') };
@@ -84,7 +84,7 @@ export function useAuth() {
   const verifyEmail = useCallback(async (token) => {
     setLoading(true);
     try {
-      const { data } = await authClient.post('/auth/verify-email', { token });
+      const { data } = await authClient.post('/api/v1/auth/verify-email', { token });
       return { ok: true, data };
     } catch (error) {
       return { ok: false, error: getApiError(error, 'No se pudo verificar el correo') };
@@ -96,7 +96,7 @@ export function useAuth() {
   const resendVerification = useCallback(async (email) => {
     setLoading(true);
     try {
-      const { data } = await authClient.post('/auth/resend-verification', { email });
+      const { data } = await authClient.post('/api/v1/auth/resend-verification', { email });
       return { ok: true, data };
     } catch (error) {
       return { ok: false, error: getApiError(error, 'No se pudo reenviar el correo') };
@@ -108,7 +108,7 @@ export function useAuth() {
   const forgotPassword = useCallback(async (email) => {
     setLoading(true);
     try {
-      const { data } = await authClient.post('/auth/forgot-password', { email });
+      const { data } = await authClient.post('/api/v1/auth/forgot-password', { email });
       return { ok: true, data };
     } catch (error) {
       return { ok: false, error: getApiError(error, 'No se pudo enviar el enlace') };
@@ -120,7 +120,7 @@ export function useAuth() {
   const resetPassword = useCallback(async ({ token, newPassword }) => {
     setLoading(true);
     try {
-      const { data } = await authClient.post('/auth/reset-password', { token, newPassword });
+      const { data } = await authClient.post('/api/v1/auth/reset-password', { token, newPassword });
       return { ok: true, data };
     } catch (error) {
       return { ok: false, error: getApiError(error, 'No se pudo restablecer la contraseña') };

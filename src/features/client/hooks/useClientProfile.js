@@ -57,7 +57,7 @@ export function useClientProfile() {
   const sendPasswordResetLink = useCallback(async () => {
     if (!user?.email) return { ok: false, error: 'No se encontró tu correo' };
     try {
-      await authClient.post('/auth/forgot-password', { email: user.email });
+      await authClient.post('/api/v1/auth/forgot-password', { email: user.email });
       return { ok: true };
     } catch (error) {
       return { ok: false, error: getApiError(error, 'No se pudo enviar el enlace') };
