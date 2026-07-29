@@ -6,6 +6,6 @@
 
 # AuthService-The5FadeFriends (Puerto 3005)
 EXPO_PUBLIC_AUTH_URL=http://192.168.0.6:3005/api/v1
-
-# HaircutFiveFriends - API principal (Puerto 3006)
+  
+# HaircutFiveFri ends - API principal (Puerto 3006)
 EXPO_PUBLIC_API_URL=http://192.168.0.6:3006/HaircutFiveFriends/api/v1
