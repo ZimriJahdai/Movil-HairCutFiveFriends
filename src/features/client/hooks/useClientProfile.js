@@ -23,7 +23,7 @@ export function useClientProfile() {
         const profilePictureDataUri = profilePicture ? await imageUriToDataUri(profilePicture) : undefined;
 
         const [authRes, clientRes] = await Promise.all([
-          authClient.put('/users/profile', {
+          authClient.put('/api/v1/users/profile', {
             name,
             phone,
             ...(profilePictureDataUri ? { profilePicture: profilePictureDataUri } : {}),
