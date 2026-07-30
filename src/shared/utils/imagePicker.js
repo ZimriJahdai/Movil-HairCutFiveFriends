@@ -48,3 +48,14 @@ export async function imageUriToDataUri(uri) {
   const mime = EXT_TO_MIME[ext] || 'image/jpeg';
   return `data:${mime};base64,${base64}`;
 }
+
+// El AI Service pide `imageBase64` + `mimeType` por separado, no un data URI
+// entero como AuthService. Parte el resultado de imageUriToDataUri en ambos.
+export async function imageUriToBase64Parts(uri) {
+  const dataUri = await imageUriToDataUri(uri);
+  const match = /^data:([^;]+);base64,(.*)$/s.exec(dataUri);
+  if (!match) {
+    return { imageBase64: dataUri, mimeType: 'image/jpeg' };
+  }
+  return { mimeType: match[1], imageBase64: match[2] };
+}

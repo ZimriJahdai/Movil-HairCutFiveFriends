@@ -35,4 +35,8 @@ export const ENDPOINTS = {
     resolveUrl(process.env.EXPO_PUBLIC_API_URL, 'http://localhost:3006'),
     '/HaircutFiveFriends/api/v1'
   ),
+  AI: ensureBasePath(
+    resolveUrl(process.env.EXPO_PUBLIC_AI_URL, 'http://localhost:8080'),
+    '/api'
+  ),
 };

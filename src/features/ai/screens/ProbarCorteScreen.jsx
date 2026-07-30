@@ -6,6 +6,7 @@ import { Button, Card } from '../../../shared/components';
 import { FONTS, FONT_SIZE, RADIUS, SHADOWS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 import { pickProfileImage } from '../../../shared/utils/imagePicker';
+import { useProbarCorte } from '../hooks/useProbarCorte';
 
 const LENGTH_OPTIONS = [
   { value: 'short', label: 'Corto' },
@@ -19,6 +20,16 @@ const STYLE_OPTIONS = [
   { value: 'urban', label: 'Urbano' },
 ];
 
+// El AI Service describe cada rasgo en prosa, así que se pintan como
+// etiqueta + párrafo, y se omite el que venga vacío.
+const ANALYSIS_ROWS = [
+  { key: 'faceShape', label: 'Forma del rostro' },
+  { key: 'hairTexture', label: 'Textura del cabello' },
+  { key: 'hairColor', label: 'Color' },
+  { key: 'facialLines', label: 'Líneas faciales' },
+  { key: 'recommendedHaircutStyle', label: 'Corte sugerido' },
+];
+
 export function ProbarCorteScreen() {
   const { colors } = useThemeStore();
   const styles = createStyles(colors);
@@ -26,8 +37,7 @@ export function ProbarCorteScreen() {
   const [photoUri, setPhotoUri] = useState(null);
   const [length, setLength] = useState('');
   const [style, setStyle] = useState('');
-  const [analysis, setAnalysis] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { analysis, generatedImage, loading, error, imageError, generate, reset } = useProbarCorte();
 
   const handlePickPhoto = async () => {
     const result = await pickProfileImage();
@@ -40,35 +50,29 @@ export function ProbarCorteScreen() {
     }
 
     setPhotoUri(result?.uri || null);
-    setAnalysis(null);
+    reset();
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!photoUri) {
       Alert.alert('Falta una foto', 'Sube una foto antes de generar el corte.');
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      const selectedLength = LENGTH_OPTIONS.find((option) => option.value === length);
-      const selectedStyle = STYLE_OPTIONS.find((option) => option.value === style);
-      setAnalysis({
-        faceShape: 'Ovalado',
-        hairTexture: 'Media',
-        hairColor: 'Oscuro',
-        recommendedHaircutStyle: selectedStyle?.label || 'Clásico',
-        lengthLabel: selectedLength?.label || 'Cualquiera',
-      });
-      setLoading(false);
-    }, 700);
+    await generate({
+      photoUri,
+      length,
+      style,
+      lengthLabel: LENGTH_OPTIONS.find((option) => option.value === length)?.label,
+      styleLabel: STYLE_OPTIONS.find((option) => option.value === style)?.label,
+    });
   };
 
   const handleClear = () => {
     setPhotoUri(null);
     setLength('');
     setStyle('');
-    setAnalysis(null);
+    reset();
   };
 
   return (
@@ -138,14 +142,19 @@ export function ProbarCorteScreen() {
         <Button title="Limpiar" onPress={handleClear} variant="secondary" style={styles.secondaryAction} />
       </View>
 
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
       {analysis ? (
         <Card style={styles.resultCard}>
           <Text style={styles.resultTitle}>Resumen del análisis</Text>
-          <Text style={styles.resultText}>Rostro: {analysis.faceShape}</Text>
-          <Text style={styles.resultText}>Textura: {analysis.hairTexture}</Text>
-          <Text style={styles.resultText}>Color: {analysis.hairColor}</Text>
-          <Text style={styles.resultText}>Sugerido: {analysis.recommendedHaircutStyle}</Text>
-          <Text style={styles.resultText}>Largo: {analysis.lengthLabel}</Text>
+          {ANALYSIS_ROWS.map(({ key, label }) =>
+            analysis[key] ? (
+              <View key={key} style={styles.resultRow}>
+                <Text style={styles.resultLabel}>{label}</Text>
+                <Text style={styles.resultText}>{analysis[key]}</Text>
+              </View>
+            ) : null
+          )}
         </Card>
       ) : null}
 
@@ -155,12 +164,14 @@ export function ProbarCorteScreen() {
           <MaterialIcons name="visibility" size={20} color={colors.primary} />
         </View>
         <View style={styles.previewBox}>
-          {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.previewImageBox} />
+          {generatedImage ? (
+            <Image source={{ uri: generatedImage }} style={styles.previewImageBox} />
           ) : (
             <View style={styles.previewPlaceholder}>
               <MaterialIcons name="face-retouching-natural" size={40} color={colors.primary} />
-              <Text style={styles.previewPlaceholderText}>Tu resultado aparecerá aquí</Text>
+              <Text style={styles.previewPlaceholderText}>
+                {imageError || 'Tu resultado aparecerá aquí'}
+              </Text>
             </View>
           )}
         </View>
@@ -251,6 +262,13 @@ const createStyles = (colors) =>
     },
     primaryAction: { flex: 1, minWidth: 180 },
     secondaryAction: { minWidth: 120 },
+    errorText: {
+      marginTop: SPACING.lg,
+      fontSize: FONT_SIZE.sm,
+      fontFamily: FONTS.body,
+      color: colors.danger,
+      lineHeight: 20,
+    },
     resultCard: {
       marginTop: SPACING.lg,
       padding: SPACING.lg,
@@ -263,6 +281,15 @@ const createStyles = (colors) =>
       fontFamily: FONTS.semibold,
       color: colors.text,
       marginBottom: SPACING.xs,
+    },
+    resultRow: { marginTop: SPACING.sm },
+    resultLabel: {
+      fontSize: FONT_SIZE.xs,
+      fontFamily: FONTS.semibold,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+      marginBottom: 2,
     },
     resultText: {
       fontSize: FONT_SIZE.sm,

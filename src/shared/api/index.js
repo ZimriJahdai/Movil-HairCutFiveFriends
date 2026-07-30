@@ -1,6 +1,7 @@
 // Barril de la capa API.
 export { default as authClient } from './authClient';
 export { default as apiClient } from './apiClient';
+export { default as aiClient } from './aiClient';
 export { buildFormData, guessImagePart } from './buildFormData';
 export { unwrap, getId } from './normalize';
 

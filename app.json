@@ -2,6 +2,7 @@
   "expo": {
     "name": "HaircutFiveFriendsMobile",
     "slug": "HaircutFiveFriendsMobile",
+    "owner": "iosef_suarez",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "haircutfivefriends",
@@ -16,6 +17,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.iosefsuarez.haircutfivefriends",
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0A",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -35,6 +37,11 @@
         }
       ],
       "expo-sharing"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9fad498e-7eb7-4f63-8ee0-9e389f6ae5d5"
+      }
+    }
   }
 }
